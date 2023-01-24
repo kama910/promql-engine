@@ -1339,6 +1339,16 @@ func TestQueriesAgainstOldEngine(t *testing.T) {
 			end:   time.Unix(3000, 0),
 			step:  2 * time.Second,
 		},
+		{
+			name: "predict linear",
+			load: `load 30s
+				http_requests_total{pod="nginx-1"} 1+1x15
+				http_requests_total{pod="nginx-2"} 1+2x18`,
+			query: `predict_linear(http_requests_total[30s], 10)`,
+			start: time.Unix(0, 0),
+			end:   time.Unix(3000, 0),
+			step:  2 * time.Second,
+		},
 	}
 
 	disableOptimizerOpts := []bool{true, false}
@@ -2236,6 +2246,13 @@ func TestInstantQuery(t *testing.T) {
 				http_requests_total{pod="nginx-1"} 1+1x15
 				http_requests_total{pod="nginx-2"} 1+2x18`,
 			query: `clamp_min(http_requests_total, scalar(max(http_requests_total)) + 10)`,
+		},
+		{
+			name: "predict linear",
+			load: `load 30s
+				http_requests_total{pod="nginx-1"} 1+1x15
+				http_requests_total{pod="nginx-2"} 1+2x18`,
+			query: `predict_linear(http_requests_total[30s], 10)`,
 		},
 	}
 

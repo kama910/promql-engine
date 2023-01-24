@@ -377,6 +377,20 @@ var Funcs = map[string]FunctionCall{
 			},
 		}
 	},
+	"predict_linear": func(f FunctionArgs) promql.Sample {
+		if len(f.ScalarPoints) == 0 || len(f.Points) < 2 {
+			return InvalidSample
+		}
+		slope, intercept := linearRegression(f.Points, f.StepTime)
+		duration := f.ScalarPoints[0]
+		return promql.Sample{
+			Metric: f.Labels,
+			Point: promql.Point{
+				T: f.StepTime,
+				V: slope*duration + intercept,
+			},
+		}
+	},
 }
 
 func NewFunctionCall(f *parser.Function) (FunctionCall, error) {
